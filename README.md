@@ -2,9 +2,9 @@
 
 > 📄 **[中文版说明文档](./README_zh.md)**
 
-A full-stack cross-platform mobile application imitating WeChat, built with uni-app + Vue 3 + TypeScript.
+A full-stack cross-platform mobile application imitating WeChat, built with uni-app + Vue 3 + TypeScript (Frontend) and Spring Boot + MyBatis + MySQL (Backend).
 
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
+![Version](https://img.shields.io/badge/version-1.2.6-blue)
 ![Platform](https://img.shields.io/badge/platform-H5%7CAndroid%7CiOS-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
@@ -16,7 +16,7 @@ A full-stack cross-platform mobile application imitating WeChat, built with uni-
 - **User Profile** - Personal information management and settings
 - **Music Player** - Built-in music playback with playlist support
 - **Game Emulator** - Built-in retro game emulator supporting various ROM formats (NES, GB/GBC, GBA, SNES, etc.), powered by [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS)
-- **AI Shopping Assistant** - Intelligent product diagnosis tool that helps users make informed purchase decisions through soul-searching questions and weighted analysis
+- **AI Shopping Assistant** - Intelligent product diagnosis tool that helps users make informed purchase decisions through weighted analysis
 - **Cross-Platform** - Runs on H5, Android, iOS, and other platforms
 
 ## Tech Stack
@@ -28,57 +28,86 @@ A full-stack cross-platform mobile application imitating WeChat, built with uni-
 - **Styling**: SCSS/uni.scss
 
 ### Backend
-- **Cloud Services**: uniCloud (DCloud)
+- **Framework**: Spring Boot 4.0.6
+- **ORM**: MyBatis
+- **Database**: MySQL
 - **Authentication**: JWT-based auth system
-- **Database**: JSON-based database with schema validation
+- **Utils**: Lombok, Validation
 
 ## Project Structure
 
 ```
-Vheart-Chat/
-├── common/                 # Common components and utilities
-│   ├── tabbar/            # Tab bar component
-│   └── utils/            # Helper functions
-├── core/                  # Core business logic
-│   ├── bean/             # Data models
-│   ├── data/             # Data definitions
-│   ├── model/            # Business models (use-xxx-model.ts)
-│   ├── net/              # Network API
-│   └── services/         # Services
-├── pages/                 # Page components
-│   ├── chat/             # Chat list page
-│   ├── chat-detail/      # Chat detail page
-│   ├── contact/          # Contacts page
-│   ├── discover/         # Discover page
-│   ├── profile/          # Profile page
-│   ├── music-index/      # Music player
-│   ├── player/           # Full-screen player
-│   ├── emulatorJs/       # Retro game emulator
+Vheart-Chat-Spring/
+├── Cloud/                    # Backend (Spring Boot)
+│   └── chat/                 # Chat service
+│       ├── src/main/java/    # Java source code
+│       │   └── com/vheart/chat/
+│       │       ├── Controller/   # REST controllers
+│       │       ├── Service/      # Business logic
+│       │       ├── Mapper/       # MyBatis mappers
+│       │       ├── pojo/         # Data models
+│       │       └── utils/        # Utility classes
+│       ├── src/main/resources/   # Configuration
+│       └── pom.xml              # Maven dependencies
+├── common/                   # Common components and utilities
+│   ├── tabbar/              # Tab bar component
+│   └── utils/               # Helper functions
+├── core/                    # Core business logic
+│   ├── bean/               # Data models
+│   ├── data/               # Data definitions
+│   ├── model/              # Business models (use-xxx-model.ts)
+│   ├── net/                # Network API
+│   └── services/           # Services
+├── pages/                   # Page components
+│   ├── chat/               # Chat list page
+│   ├── chat-detail/        # Chat detail page
+│   ├── contact/            # Contacts page
+│   ├── discover/           # Discover page
+│   ├── me/                 # Profile page
+│   ├── music-index/        # Music player
+│   ├── player/             # Full-screen player
+│   ├── emulatorJs/         # Retro game emulator
 │   ├── DoNotBuy-AnAssistant/  # AI shopping assistant
 │   └── ...
-├── static/               # Static resources
-├── uniCloud-alipay/      # Cloud functions
-│   └── cloudfunctions/   # Backend API functions
-│       ├── Api-Auth/     # Authentication API
-│       ├── Api-Vheart-Chat/  # Chat API
-│       └── ...
-└── uni_modules/          # Uni-app plugins
+├── static/                 # Static resources
+├── uni_modules/            # Uni-app plugins
+├── unpackage/              # Build outputs
+├── App.vue                 # Root component
+├── main.js                 # Entry point
+├── manifest.json           # App configuration
+├── pages.json              # Page routing
+└── uni.scss                # Global styles
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 16+
-- HBuilderX (recommended) or VS Code with uni-app extension
-- npm or yarn
+- **Frontend**: Node.js 16+, HBuilderX (recommended) or VS Code with uni-app extension
+- **Backend**: JDK 17+, Maven 3.6+, MySQL 8.0+
 
-### Installation
+### Backend Setup
+
+1. **Create database**
+```sql
+CREATE DATABASE vheart_chat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+2. **Configure database connection**
+   - Edit `Cloud/chat/src/main/resources/application.yml`
+   - Update database username and password as needed
+
+3. **Run backend**
+```bash
+cd Cloud/chat
+mvn spring-boot:run
+```
+
+The backend service will start at `http://localhost:8888`
+
+### Frontend Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/Vheart-Chat.git
-
 # Install dependencies
 npm install
 ```
@@ -113,22 +142,29 @@ npm run build:h5
 
 ## Configuration
 
-### manifest.json
+### Backend Configuration (`application.yml`)
 
-Key configurations in `manifest.json`:
+Key configurations:
+- `spring.datasource`: MySQL connection settings
+- `server.port`: Backend service port (default: 8888)
+- `mybatis.configuration.map-underscore-to-camel-case`: Enable camelCase mapping
 
-- `appid`: Application identifier
-- `versionName` / `versionCode`: Version information
-- `modules`: Required native modules (Push, etc.)
-- `distribute`: Publishing configurations for Android/iOS
+### Frontend Configuration
 
-### Cloud Functions
+- `manifest.json`: App ID, version info, native modules
+- `pages.json`: Page routing and tab bar configuration
+- `core/net/net-api.ts`: API base URL configuration
 
-Deploy cloud functions to uniCloud before running the app:
+## API Endpoints
 
-1. Open `uniCloud-alipay` directory in HBuilderX
-2. Right-click on `cloudfunctions` folder
-3. Select "Deploy to Cloud Space"
+| Module | Endpoint | Method | Description |
+|--------|----------|--------|-------------|
+| Auth | `/api/user/login` | POST | User login |
+| Auth | `/api/user/register` | POST | User registration |
+| Chat | `/api/message/list` | GET | Get message list |
+| Chat | `/api/message/send` | POST | Send message |
+| Contact | `/api/friend/list` | GET | Get friend list |
+| Contact | `/api/friend/add` | POST | Send friend request |
 
 ## Screenshots
 
@@ -153,5 +189,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [uni-app](https://uniapp.dcloud.io/) - Cross-platform framework
-- [DCloud](https://www.dcloud.io/) - Cloud services and tooling
 - [Vue.js](https://vuejs.org/) - Progressive JavaScript framework
+- [Spring Boot](https://spring.io/projects/spring-boot) - Java backend framework
+- [MyBatis](https://mybatis.org/mybatis-3/) - SQL mapping framework
+- [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS) - Retro game emulator
